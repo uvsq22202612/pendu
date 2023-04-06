@@ -12,144 +12,89 @@ mot_choisi = random.choice(liste_mots)
 lettres_trouvees = []
 lettres_fausses = []
 nb_coups = 7
+scores=[]
 
 #propose au joueur de continuer a jouer ou arreter
 def fin_partie():
     global mot_choisi, lettres_trouvees, lettres_fausses, nb_coups
-    
     if nb_coups == 0:
         messagebox.showinfo("Fin de partie", "Perdu : le mot était " + mot_choisi)
     else:
         messagebox.showinfo("Fin de partie", "Gagné !")
-        
     if messagebox.askyesno("Nouvelle partie", "Voulez-vous jouer une nouvelle partie ?"):
-        # Nouvelle partie
+    # Nouvelle partie
         lettres_trouvees = []
         lettres_fausses = []
         nb_coups = 7
         mot_choisi = random.choice(liste_mots)
         label_mot.config(text=" _" * len(mot_choisi))
         label_lettres_fausses.config(text="")
+        # Effacer l'état du pendu
+        dessin.delete("all")
         affiche_pendu(nb_coups)
         label_resultat.config(text="")
         for bouton in liste_boutons:
             bouton.config(state=tk.NORMAL)
     else:
-        # Sauvegarde du score
-        score = len(lettres_trouvees)
+    # Sauvegarde du score
+        score = nb_coups
         sauvegarder_score(score, nb_coups)
-        # Quitte le programme
+    # Quitte le programme
         fenetre.quit()
 
 
 #initialisation de la fonction sauvegarder score 
 def sauvegarder_score(score, nb_coups):
-    # On commence par charger les scores précédents, s'ils existent
     try:
-        with open("scores.pickle", "rb") as f:
-            scores_precedents = pickle.load(f)
-    except:
-        scores_precedents = {}
-    # On ajoute le nouveau score
-    scores_precedents[score] = nb_coups
-    # On sauvegarde les scores
-    with open("scores.pickle", "wb") as f:
-        pickle.dump(scores_precedents, f)
-
-#lire les scores 
-def lire_scores():
-    try:
-        with open("scores.pickle", "rb") as f:
+        with open('scores.pickle', 'wb') as f:
             scores = pickle.load(f)
     except:
-        scores = {}
-    return scores
+        scores = []
+        
+    scores.append((nb_coups))
+    with open('scores.pickle', 'wb') as f:
+        pickle.dump(scores, f)
+
+
+#lire les scores 
+
 #afficher scores 
-def afficher_scores():
-    fenetre_scores = Tk()
-    fenetre_scores.title("Scores")
-    scores = lire_scores()
-    if len(scores) == 0:
-        messagebox.showinfo("Scores", "Aucun score enregistré.")
+# Fonction pour afficher les scores
+def afficher_scores(score):
+    if isinstance(score, (list, tuple)) and len(score) == 2:
+        message = "Score: {} - Coups restants: {}\n".format(score[0], score[1])
     else:
-        texte_scores = "Scores précédents :\n\n"
-        for score, nb_coups in scores.items():
-            texte_scores += "- Score : {} - Nombre de coups : {}\n".format(score, nb_coups)
-        messagebox.showinfo("Scores", texte_scores)
+        message = "Score invalide\n"
+    print(message)
+
 
 # afficher l'état du pendu
 def affiche_pendu(nb_coups):
     if nb_coups == 7:
-        pendu = """
-              _____
-             |     |
-             |     
-             |     
-             |    
-             |    
-             |___
-        """
+        dessin.create_line(50,400,450,400,fill='black', width=5)
+        dessin.create_line(100,400,100,100,fill='black', width=5)
+        dessin.create_line(100,150,150,100,fill='black', width=5)
+        dessin.create_line(98,100,300,100,fill='black', width=5)
+        dessin.create_line(300,100,300,150,fill='black', width=5)
     elif nb_coups == 6:
-        pendu = """
-              _____
-             |     |
-             |     O
-             |     
-             |    
-             |    
-             |___
-        """
-    elif nb_coups == 5:
-        pendu = """
-              _____
-             |     |
-             |     O
-             |     |
-             |     |
-             |    
-             |___
-        """
+        dessin.create_oval(270,150,330,210, fill='red', width=5)
+    elif nb_coups == 5:   
+        dessin.create_line(300,210,300,300, fill='black', width=5)
     elif nb_coups == 4:
-        pendu = """
-              _____
-             |     |
-             |     O
-             |    /|
-             |     |
-             |    
-             |___
-        """
+        dessin.create_line(300,230,260,220, fill='black', width=5)
     elif nb_coups == 3:
-        pendu = """
-              _____
-             |     |
-             |     O
-             |    /|\\
-             |     |
-             |    
-             |___
-        """
+        dessin.create_line(300,230,340,220, fill='black', width=5)
     elif nb_coups == 2:
-        pendu = """
-              _____
-             |     |
-             |     O
-             |    /|\\
-             |     |
-             |    / 
-             |___
-        """
+        dessin.create_line(300,300,260,320, fill='black', width=5)
+    elif nb_coups == 1:
+        dessin.create_line(300,300,340,320, fill='black', width=5)
     else:
-        pendu = """
-              _____
-             |     |
-             |     O
-             |    /|\\
-             |     |
-             |    / \\
-             |___
-        """
-    label_pendu.config(text=pendu)
+        dessin.create_rectangle(0,0,500,500, fill='white')
+        dessin.create_oval(50,50,450,450, fill='red', width=5)
+        dessin.create_oval(100,150,200,250, fill='black', width=5)
+        dessin.create_oval(300,150,400,250, fill='black', width=5)
+        dessin.create_line(150,380,250,280, fill='black' ,width=30, capstyle='round')
+        dessin.create_line(250,280,350,380, fill='black', width=30, capstyle='round')
     # Affichage des lettres fausses
     label_lettres_fausses.config(text="Lettres fausses : " + ", ".join(lettres_fausses))
     # Affichage du nombre de coups restants
@@ -187,6 +132,15 @@ fenetre.title("Jeu du pendu")
 # canvas pour dessiner le pendu
 canvas = tk.Canvas(fenetre, width=200, height=200)
 canvas.pack()
+dessin=tk.Canvas(fenetre, bg="ivory", width=500, height=500)
+#button=tk.Button(fenetre, text="Aide",command=aide)
+dessin.pack(side='top')
+#button.pack(side='bottom')
+
+
+# Bouton pour afficher les scores
+bouton_scores = tk.Button(fenetre, text="Scores", command=afficher_scores)
+bouton_scores.pack()
 
 # afficher le mot masqué
 label_mot = tk.Label(fenetre, text=" _" * len(mot_choisi))
