@@ -6,13 +6,46 @@ import pickle
 liste_mots = ["python", "ordinateur", "programmation", "algorithme", "variable"]
 
 # Sélection d'un mot au hasard
-mot_choisi = random.choice(liste_mots)
+mot_choisi = []
+
+#Sélection du mot en fonction de la longueur 
+def longueur(size_var):
+    global mot_choisi 
+    if size_var == len(liste_mots[0]):
+        mot_choisi = liste_mots[0]
+    elif size_var == len(liste_mots[1]):
+        mot_choisi = liste_mots[1]
+    elif size_var == len(liste_mots[2]):
+        mot_choisi = liste_mots[2]
+    elif size_var == len(liste_mots[3]):
+        mot_choisi = liste_mots[3]
+    elif size_var == len(liste_mots[4]):
+        mot_choisi = liste_mots[4]
 
 # Initialisation des variables
 lettres_trouvees = []
 lettres_fausses = []
 nb_coups = 7
 scores=[]
+
+#Fonction qui permet d'adapter le nombre de coups
+def nombre_coups(nb_var):
+    global nb_coups
+    if nb_var == "1":
+        nb_coups = 1
+    elif nb_var == "2":
+        nb_coups = 2
+    elif nb_var == "3":
+        nb_coups = 3
+    elif nb_var == "4":
+        nb_coups = 4 
+    elif nb_var == "5":
+        nb_coups = 5 
+    elif nb_var == "6":
+        nb_coups = 6
+    elif nb_var == "7":
+        nb_coups = 7
+
 
 #propose au joueur de continuer a jouer ou arreter
 def fin_partie():
@@ -26,7 +59,8 @@ def fin_partie():
         lettres_trouvees = []
         lettres_fausses = []
         nb_coups = 7
-        mot_choisi = random.choice(liste_mots)
+        nb_var.set("Choisir le nb d'erreurs acceptées")
+        size_var.set("Choisir la longueur du mot avant de jouer")
         label_mot.config(text=" _" * len(mot_choisi))
         label_lettres_fausses.config(text="")
         # Effacer l'état du pendu
@@ -79,14 +113,29 @@ def affiche_pendu(nb_coups):
     elif nb_coups == 6:
         dessin.create_oval(270,150,330,210, fill='red', width=5)
     elif nb_coups == 5:   
+        dessin.create_oval(270,150,330,210, fill='red', width=5)
         dessin.create_line(300,210,300,300, fill='black', width=5)
     elif nb_coups == 4:
+        dessin.create_oval(270,150,330,210, fill='red', width=5)
+        dessin.create_line(300,210,300,300, fill='black', width=5)
         dessin.create_line(300,230,260,220, fill='black', width=5)
     elif nb_coups == 3:
+        dessin.create_oval(270,150,330,210, fill='red', width=5)
+        dessin.create_line(300,210,300,300, fill='black', width=5)
+        dessin.create_line(300,230,260,220, fill='black', width=5)
         dessin.create_line(300,230,340,220, fill='black', width=5)
     elif nb_coups == 2:
+        dessin.create_oval(270,150,330,210, fill='red', width=5)
+        dessin.create_line(300,210,300,300, fill='black', width=5)
+        dessin.create_line(300,230,260,220, fill='black', width=5)
+        dessin.create_line(300,230,340,220, fill='black', width=5)
         dessin.create_line(300,300,260,320, fill='black', width=5)
     elif nb_coups == 1:
+        dessin.create_oval(270,150,330,210, fill='red', width=5)
+        dessin.create_line(300,210,300,300, fill='black', width=5)
+        dessin.create_line(300,230,260,220, fill='black', width=5)
+        dessin.create_line(300,230,340,220, fill='black', width=5)
+        dessin.create_line(300,300,260,320, fill='black', width=5)
         dessin.create_line(300,300,340,320, fill='black', width=5)
     else:
         dessin.create_rectangle(0,0,500,500, fill='white')
@@ -129,13 +178,38 @@ def lettre_cliquee(lettre):
 fenetre = tk.Tk()
 fenetre.title("Jeu du pendu")
 
+# Ajouter un menu déroulant pour choisir la taille du mot
+size_var = tk.StringVar(fenetre)
+size_var.set("Choisir la longueur du mot avant de jouer")  # Valeur par défaut
+size_menu = tk.OptionMenu(fenetre, size_var, len(liste_mots[0]), len(liste_mots[1]), len(liste_mots[2]), len(liste_mots[3]), len(liste_mots[4]), command=longueur)
+size_menu.pack()
+
+# Ajouter un menu pour choisir le nb de coups
+nb_var = tk.StringVar(fenetre)
+nb_var.set("Choisir le nombre d'erreurs acceptées") #valeur par défaut
+nb_menu = tk.OptionMenu(fenetre, nb_var, "1", "2", "3", "4", "5", "6", "7", command=nombre_coups)
+nb_menu.pack()
+
 # canvas pour dessiner le pendu
-canvas = tk.Canvas(fenetre, width=200, height=200)
+canvas = tk.Canvas(fenetre, width=100, height=100)
 canvas.pack()
 dessin=tk.Canvas(fenetre, bg="ivory", width=500, height=500)
 #button=tk.Button(fenetre, text="Aide",command=aide)
 dessin.pack(side='top')
 #button.pack(side='bottom')
+
+#bouton pour afficher les règles du jeu
+def create():
+    help = tk.Tk()
+    help.title("aide du jeu")
+    aide = tk.Label(help, text = "Le but du jeu est simple : deviner toute les lettres qui doivent\n"
+                    "composer un mot, éventuellement avec un nombre limité de tentatives et des thèmes\n"
+                    "fixés à l'avance. A chaque fois que le joueur devine une lettre, celle-ci est affichée.\n" 
+                    "Dans le cas contraire, le dessin d'un pendu se met à apparaître…")
+    aide.pack()                 
+
+btn = tk.Button(fenetre, text="Aide", command = create)
+btn.pack()
 
 
 # Bouton pour afficher les scores
@@ -170,6 +244,8 @@ label_resultat.pack()
 # afficher le pendu
 label_pendu = tk.Label(fenetre, text="")
 label_pendu.pack()
+
+
 
 # demarrage programme
 fenetre.mainloop()
